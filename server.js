@@ -38,6 +38,27 @@ io.on("connection", (socket) => {
     io.emit("message", { user: socket.id, text: msg });
   });
 
+  // Function to generate a random color
+  const generateRandomColor = () => {
+    const letters = "0123456789ABCDEF";
+    let color = "#";
+    for (let i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+  };
+
+  // Function to emit a valid color every 10 seconds
+  const sendValidColor = () => {
+    const validColor = generateRandomColor();
+    io.emit("validColor", validColor); // Emit the color to all connected clients
+  };
+
+  // Set an interval to update the valid color every 10 seconds
+  const interval = setInterval(() => {
+    sendValidColor();
+  }, 3000); // 10 seconds interval
+
   // Handle disconnect
   socket.on("disconnect", () => {
     // Remove the user from the list when they disconnect
@@ -46,6 +67,10 @@ io.on("connection", (socket) => {
     io.emit("message", "A user has left the chat");
     // Update the user list for everyone
     io.emit("users", Object.values(users));
+
+    // Stop the interval when the socket disconnects
+
+    clearInterval(interval);
   });
 });
 
